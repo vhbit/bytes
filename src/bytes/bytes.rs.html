@@ -302,91 +302,6 @@
 <span id="260">260</span>
 <span id="261">261</span>
 <span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
-<span id="298">298</span>
-<span id="299">299</span>
-<span id="300">300</span>
-<span id="301">301</span>
-<span id="302">302</span>
-<span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
-<span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
-<span id="309">309</span>
-<span id="310">310</span>
-<span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
-<span id="337">337</span>
-<span id="338">338</span>
-<span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
-<span id="347">347</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> {<span class='ident'>Buf</span>, <span class='ident'>ByteStr</span>, <span class='ident'>ByteBuf</span>, <span class='ident'>SmallByteStr</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>mem</span>, <span class='ident'>ops</span>, <span class='ident'>ptr</span>};
@@ -396,6 +311,7 @@
 
 <span class='kw'>const</span> <span class='ident'>INLINE</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>1</span>;
 
+<span class='doccomment'>/// A specialized `ByteStr` box.</span>
 <span class='attribute'>#[<span class='ident'>unsafe_no_drop_flag</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Bytes</span> {
     <span class='ident'>vtable</span>: <span class='ident'>NonZero</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>,
@@ -641,92 +557,6 @@
         <span class='self'>self</span>.<span class='ident'>split_at</span>(<span class='ident'>mid</span>)
     }
 }
-
-<span class='comment'>/*
-impl ops::Index&lt;usize&gt; for Bytes {
-    type Output = u8;
-
-    fn index(&amp;self, index: &amp;usize) -&gt; &amp;u8 {
-        self.bytes.index(index)
-    }
-}
-
-impl PartialEq&lt;Bytes&gt; for Bytes {
-    fn eq(&amp;self, other: &amp;Bytes) -&gt; bool {
-        let mut i1 = self.iter();
-        let mut i2 = other.iter();
-
-        loop {
-            let el = i1.next();
-
-            if el != i2.next() {
-                return false;
-            }
-
-            if el.is_none() {
-                return true;
-            }
-        }
-    }
-}
-
-pub struct BytesIter&lt;&#39;a&gt; {
-    bytes: &amp;&#39;a Bytes,
-    pos: usize,
-}
-
-impl&lt;&#39;a&gt; Iterator for BytesIter&lt;&#39;a&gt; {
-    type Item = u8;
-
-    fn next(&amp;mut self) -&gt; Option&lt;u8&gt; {
-        if self.pos == self.bytes.len() {
-            return None;
-        }
-
-        let ret = self.bytes[self.pos];
-        self.pos += 1;
-        Some(ret)
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::Bytes;
-
-    #[test]
-    pub fn test_accessing_bytes() {
-        let bytes = from_slice(b&quot;foo&quot;);
-
-        for i in 0..3us {
-            assert_eq!(b&quot;foo&quot;[i], bytes[i]);
-        }
-    }
-
-    /*
-     *
-     * ===== Equality =====
-     *
-     */
-
-    #[test]
-    pub fn test_literal_bytes_eq() {
-        assert!(from_slice(b&quot;foo&quot;) == from_slice(b&quot;foo&quot;));
-        assert!(from_slice(b&quot;foo&quot;) != from_slice(b&quot;bar&quot;));
-        assert!(from_slice(b&quot;foo&quot;) != from_slice(b&quot;foo*&quot;));
-        assert!(from_slice(b&quot;foo*&quot;) != from_slice(b&quot;foo&quot;));
-    }
-
-    /*
-     *
-     * ===== Helpers =====
-     *
-     */
-
-    fn from_slice(bytes: &amp;[u8]) -&gt; Bytes {
-        Bytes::from_slice(bytes)
-    }
-}
-*/</span>
 
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>test_size_of</span>() {
